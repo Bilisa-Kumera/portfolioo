@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure we're not sending any icon field
-    const { icon, ...skillData } = data;
+    const { /* icon, */ ...skillData } = data;
 
     console.log('Creating new skill...');
     const skill = await Skill.create(skillData);
@@ -73,7 +73,7 @@ export async function PUT(req: NextRequest) {
   try {
     await connectDB();
     const data = await req.json();
-    const { _id, icon, ...update } = data;
+    const { _id, /* icon, */ ...update } = data;
     const skill = await Skill.findByIdAndUpdate(_id, update, { new: true });
     return NextResponse.json(skill);
   } catch (error) {
