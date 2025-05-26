@@ -1,17 +1,25 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 
 // GET: List all projects
 export async function GET() {
   try {
+    console.log('Attempting to connect to MongoDB...');
     await connectDB();
-    const projects = await Project.find().sort({ createdAt: -1 });
+    console.log('MongoDB connected, fetching projects...');
+    
+    const projects = await Project.find().sort({ _id: -1 });
+    console.log(`Found ${projects.length} projects`);
+    
     return NextResponse.json(projects);
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    console.error('Error in GET /api/projects:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { 
+        error: 'Failed to fetch projects',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

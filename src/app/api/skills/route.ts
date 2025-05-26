@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Skill from '@/models/Skill';
 
 // GET: List all skills
@@ -20,14 +20,49 @@ export async function GET() {
 // POST: Create a new skill
 export async function POST(req: NextRequest) {
   try {
+    console.log('Attempting to connect to MongoDB...');
     await connectDB();
+    console.log('MongoDB connected, processing request...');
+    
     const data = await req.json();
-    const skill = await Skill.create(data);
+    console.log('Received data:', data);
+
+    // Validate required fields
+    const requiredFields = ['name', 'level', 'category', 'image'];
+    const missingFields = requiredFields.filter(field => !data[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      return NextResponse.json(
+        { error: `Missing required fields: ${missingFields.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Validate level is between 0 and 100
+    if (data.level < 0 || data.level > 100) {
+      console.error('Invalid level value:', data.level);
+      return NextResponse.json(
+        { error: 'Level must be between 0 and 100' },
+        { status: 400 }
+      );
+    }
+
+    // Ensure we're not sending any icon field
+    const { icon, ...skillData } = data;
+
+    console.log('Creating new skill...');
+    const skill = await Skill.create(skillData);
+    console.log('Skill created successfully:', skill);
+    
     return NextResponse.json(skill);
   } catch (error) {
     console.error('Error creating skill:', error);
     return NextResponse.json(
-      { error: 'Failed to create skill' },
+      { 
+        error: 'Failed to create skill',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
@@ -38,7 +73,7 @@ export async function PUT(req: NextRequest) {
   try {
     await connectDB();
     const data = await req.json();
-    const { _id, ...update } = data;
+    const { _id, icon, ...update } = data;
     const skill = await Skill.findByIdAndUpdate(_id, update, { new: true });
     return NextResponse.json(skill);
   } catch (error) {

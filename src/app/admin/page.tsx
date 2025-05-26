@@ -17,8 +17,9 @@ interface Project {
 interface Skill {
   _id: string;
   name: string;
-  level: string;
-  image: string; // base64 string
+  level: number;
+  category: string;
+  image: string;
 }
 
 // About type
@@ -50,14 +51,11 @@ export default function AdminDashboard() {
 
   // Skill state
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [skillForm, setSkillForm] = useState<{
-    name: string;
-    level: string;
-    image: string;
-  }>({
+  const [skillForm, setSkillForm] = useState({
     name: "",
     level: "",
-    image: "",
+    category: "",
+    image: ""
   });
   const [editSkillId, setEditSkillId] = useState<string | null>(null);
 
@@ -244,24 +242,36 @@ export default function AdminDashboard() {
     setError(null);
 
     try {
+      // Convert level to number
+      const skillData = {
+        ...skillForm,
+        level: Number(skillForm.level)
+      };
+
       if (editSkillId !== null) {
         // Update
         const res = await fetch("/api/skills", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ _id: editSkillId, ...skillForm }),
+          body: JSON.stringify({ _id: editSkillId, ...skillData }),
         });
-        if (!res.ok) throw new Error("Failed to update skill.");
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to update skill.");
+        }
       } else {
         // Add
         const res = await fetch("/api/skills", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(skillForm),
+          body: JSON.stringify(skillData),
         });
-        if (!res.ok) throw new Error("Failed to add skill.");
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to add skill.");
+        }
       }
-      setSkillForm({ name: "", level: "", image: "" });
+      setSkillForm({ name: "", level: "", category: "", image: "" });
       setEditSkillId(null);
       fetchSkills();
     } catch (err) {
@@ -272,7 +282,12 @@ export default function AdminDashboard() {
   };
 
   const handleSkillEdit = (skill: Skill) => {
-    setSkillForm({ name: skill.name, level: skill.level, image: skill.image });
+    setSkillForm({
+      name: skill.name,
+      level: skill.level.toString(),
+      category: skill.category,
+      image: skill.image
+    });
     setEditSkillId(skill._id);
   };
 
@@ -288,7 +303,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed to delete skill.");
       if (editSkillId === id) {
         setEditSkillId(null);
-        setSkillForm({ name: "", level: "", image: "" });
+        setSkillForm({ name: "", level: "", category: "", image: "" });
       }
       fetchSkills();
     } catch (err) {
@@ -299,40 +314,38 @@ export default function AdminDashboard() {
   };
 
   // ---------------------- About ----------------------
- // ---------------------- About ----------------------
-const fetchAbout = async () => {
-  setLoading(true);
-  setError(null);
+  const fetchAbout = async () => {
+    setLoading(true);
+    setError(null);
 
-  try {
-    const res = await fetch("/api/about");
-    if (!res.ok) {
-      throw new Error(`Failed to fetch about entries: ${res.status} ${res.statusText}`);
-    }
+    try {
+      const res = await fetch("/api/about");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch about entries: ${res.status} ${res.statusText}`);
+      }
 
-    const data = await res.json();
+      const data = await res.json();
 
-    // If the response is already an array, use it directly:
-    if (Array.isArray(data)) {
-      setAboutEntries(data);
+      // If the response is already an array, use it directly:
+      if (Array.isArray(data)) {
+        setAboutEntries(data);
+      }
+      // If it's an object (single entry), wrap it in an array
+      else if (data && typeof data === "object") {
+        setAboutEntries([data]);
+      }
+      // If it's something else (e.g. null, string), treat as "no valid entries"
+      else {
+        throw new Error("Invalid response format: expected an array or object of about entries");
+      }
+    } catch (err) {
+      console.error("Error fetching about entries:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch about entries.");
+      setAboutEntries([]); // always reset to an empty array on error
+    } finally {
+      setLoading(false);
     }
-    // If it's an object (single entry), wrap it in an array
-    else if (data && typeof data === "object") {
-      setAboutEntries([data]);
-    }
-    // If it's something else (e.g. null, string), treat as “no valid entries”
-    else {
-      throw new Error("Invalid response format: expected an array or object of about entries");
-    }
-  } catch (err) {
-    console.error("Error fetching about entries:", err);
-    setError(err instanceof Error ? err.message : "Failed to fetch about entries.");
-    setAboutEntries([]); // always reset to an empty array on error
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleAboutChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -575,106 +588,107 @@ const fetchAbout = async () => {
             {error && <div className="mb-4 text-red-400">{error}</div>}
             {loading && <div className="mb-4 text-gray-400">Loading...</div>}
 
-            <form onSubmit={handleSkillSubmit} className="mb-8 space-y-4">
-              <input
-                type="text"
-                name="name"
-                placeholder="Skill Name"
-                value={skillForm.name}
-                onChange={handleSkillChange}
-                className="w-full px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-red-500 outline-none"
-                required
-              />
-              <input
-                type="text"
-                name="level"
-                placeholder="Skill Level"
-                value={skillForm.level}
-                onChange={handleSkillChange}
-                className="w-full px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-red-500 outline-none"
-                required
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleSkillImageUpload}
-                className="w-full px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-red-500 outline-none"
-                required
-              />
-              {skillForm.image && (
-                <div className="mt-2">
-                  <img
-                    src={skillForm.image}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover rounded shadow border-2 border-red-400"
+            <div className="w-full max-w-2xl">
+              <form onSubmit={handleSkillSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={skillForm.name}
+                    onChange={handleSkillChange}
+                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                    required
                   />
                 </div>
-              )}
-              <div className="flex gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300">Level (0-100)</label>
+                  <input
+                    type="number"
+                    name="level"
+                    value={skillForm.level}
+                    onChange={handleSkillChange}
+                    min="0"
+                    max="100"
+                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300">Category</label>
+                  <input
+                    type="text"
+                    name="category"
+                    value={skillForm.category}
+                    onChange={handleSkillChange}
+                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300">Skill Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleSkillImageUpload}
+                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                    required={!skillForm.image}
+                  />
+                  {skillForm.image && (
+                    <div className="mt-2">
+                      <img
+                        src={skillForm.image}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded shadow border-2 border-red-400"
+                      />
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors"
                   disabled={loading}
+                  className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                  {editSkillId !== null ? "Update Skill" : "Add Skill"}
+                  {loading ? "Saving..." : editSkillId ? "Update Skill" : "Add Skill"}
                 </button>
-                {editSkillId !== null && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditSkillId(null);
-                      setSkillForm({ name: "", level: "", image: "" });
-                    }}
-                    className="px-6 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white font-semibold transition-colors"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
+              </form>
 
-            <ul className="space-y-4">
-              {!loading && skills.length === 0 && (
-                <li className="text-gray-500">No skills added yet.</li>
-              )}
-              {skills.map((skill) => (
-                <li
-                  key={skill._id}
-                  className="bg-gray-800 rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                >
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={skill.image}
-                      alt={skill.name}
-                      className="w-16 h-16 object-cover rounded shadow border-2 border-red-400"
-                    />
-                    <div>
-                      <div className="font-bold text-lg text-red-300">
-                        {skill.name}
+              <ul className="mt-8 space-y-4">
+                {skills.map((skill) => (
+                  <li
+                    key={skill._id}
+                    className="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+                  >
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={skill.image}
+                        alt={skill.name}
+                        className="w-16 h-16 object-cover rounded shadow border-2 border-red-400"
+                      />
+                      <div>
+                        <h3 className="text-lg font-semibold text-red-400">{skill.name}</h3>
+                        <p className="text-gray-400">Level: {skill.level}%</p>
+                        <p className="text-gray-400">Category: {skill.category}</p>
                       </div>
-                      <div className="text-gray-400 text-sm">{skill.level}</div>
                     </div>
-                  </div>
-                  <div className="flex gap-2 mt-2 sm:mt-0">
-                    <button
-                      onClick={() => handleSkillEdit(skill)}
-                      className="px-4 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-semibold transition-colors"
-                      disabled={loading}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleSkillDelete(skill._id)}
-                      className="px-4 py-1 rounded bg-red-700 hover:bg-red-800 text-white font-semibold transition-colors"
-                      disabled={loading}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleSkillEdit(skill)}
+                        className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleSkillDelete(skill._id)}
+                        className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 rounded"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
 

@@ -1,5 +1,10 @@
 import { Schema, model, models } from 'mongoose';
 
+// Delete the existing model if it exists
+if (models.Skill) {
+  delete models.Skill;
+}
+
 const SkillSchema = new Schema({
   name: {
     type: String,
@@ -15,9 +20,9 @@ const SkillSchema = new Schema({
     type: String,
     required: [true, 'Skill category is required'],
   },
-  icon: {
+  image: {
     type: String,
-    required: [true, 'Skill icon is required'],
+    required: [true, 'Skill image is required'],
   },
   createdAt: {
     type: Date,
@@ -29,4 +34,4 @@ const SkillSchema = new Schema({
   },
 });
 
-export default models.Skill || model('Skill', SkillSchema); 
+export default model('Skill', SkillSchema); 

@@ -347,9 +347,12 @@ export default function Home() {
                   <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-red-500 to-purple-500 text-transparent bg-clip-text">
                     {skill.name}
                   </h3>
-                  <p className="text-gray-400">
-                    {skill.level}
-                  </p>
+                  <div className="w-full bg-gray-700 rounded-full h-2.5">
+                    <div 
+                      className="bg-gradient-to-r from-red-500 to-purple-500 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${skill.level}%` }}
+                    />
+                  </div>
                 </div>
               </motion.div>
             ))}
