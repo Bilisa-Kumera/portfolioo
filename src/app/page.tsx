@@ -234,24 +234,28 @@ export default function Home() {
                 {firstAbout.description}
               </p>
               <div className="flex gap-6">
-                <Link href="/projects" passHref>
-                  <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    href="/projects"
                     className="inline-block px-8 py-3 bg-gradient-to-r from-red-600 to-purple-600 rounded-full font-bold hover:from-red-700 hover:to-purple-700 shadow-lg hover:shadow-red-500/30 transition-all duration-300 cursor-pointer"
                   >
                     View Projects
-                  </motion.a>
-                </Link>
-                <Link href="/contact" passHref>
-                  <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    href="/contact"
                     className="inline-block px-8 py-3 border-2 border-red-500 rounded-full font-bold hover:bg-red-500/10 transition-all duration-300 cursor-pointer"
                   >
                     Contact Me
-                  </motion.a>
-                </Link>
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           </div>
