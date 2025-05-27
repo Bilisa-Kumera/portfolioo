@@ -11,6 +11,7 @@ interface Project {
   subtitle: string;
   description: string;
   image: string; // base64 string
+  link: string; // URL to play store or website
 }
 
 // Skill type
@@ -41,11 +42,13 @@ export default function AdminDashboard() {
     subtitle: string;
     description: string;
     image: string;
+    link: string;
   }>({
     title: "",
     subtitle: "",
     description: "",
     image: "",
+    link: "",
   });
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
 
@@ -153,7 +156,7 @@ export default function AdminDashboard() {
         });
         if (!res.ok) throw new Error("Failed to add project.");
       }
-      setProjectForm({ title: "", subtitle: "", description: "", image: "" });
+      setProjectForm({ title: "", subtitle: "", description: "", image: "", link: "" });
       setEditProjectId(null);
       fetchProjects();
     } catch (err) {
@@ -169,6 +172,7 @@ export default function AdminDashboard() {
       subtitle: project.subtitle,
       description: project.description,
       image: project.image,
+      link: project.link,
     });
     setEditProjectId(project._id);
   };
@@ -185,7 +189,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed to delete project.");
       if (editProjectId === id) {
         setEditProjectId(null);
-        setProjectForm({ title: "", subtitle: "", description: "", image: "" });
+        setProjectForm({ title: "", subtitle: "", description: "", image: "", link: "" });
       }
       fetchProjects();
     } catch (err) {
@@ -488,6 +492,15 @@ export default function AdminDashboard() {
                 required
               />
               <input
+                type="url"
+                name="link"
+                placeholder="Project Link (Play Store or Website URL)"
+                value={projectForm.link}
+                onChange={handleProjectChange}
+                className="w-full px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-red-500 outline-none"
+                required
+              />
+              <input
                 type="file"
                 accept="image/*"
                 onChange={handleProjectImageUpload}
@@ -521,6 +534,7 @@ export default function AdminDashboard() {
                         subtitle: "",
                         description: "",
                         image: "",
+                        link: "",
                       });
                     }}
                     className="px-6 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white font-semibold transition-colors"
@@ -557,6 +571,16 @@ export default function AdminDashboard() {
                       <div className="text-gray-300 mt-1">
                         {project.description}
                       </div>
+                      {project.link && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 mt-2 inline-block"
+                        >
+                          View Project →
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-2 sm:mt-0">

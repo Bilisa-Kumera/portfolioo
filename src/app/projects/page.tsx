@@ -9,6 +9,7 @@ interface Project {
   subtitle: string;
   description: string;
   image: string;
+  link: string;
 }
 
 export default function Projects() {
@@ -109,6 +110,16 @@ export default function Projects() {
                     </span>
                   )}
                 </div>
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-6 py-2 bg-gradient-to-r from-red-600 to-purple-600 rounded-full text-sm font-bold hover:from-red-700 hover:to-purple-700 transition-all duration-300"
+                  >
+                    View Project
+                  </a>
+                )}
               </div>
             </div>
           ))}

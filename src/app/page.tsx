@@ -21,6 +21,7 @@ interface Project {
   subtitle: string;
   description: string;
   image: string;
+  link: string;
 }
 
 interface Skill {
@@ -304,21 +305,35 @@ export default function Home() {
                   <div className={`text-gray-300 leading-relaxed mb-6 ${!project.showFullDescription ? 'line-clamp-5' : ''}`}>
                     {project.description}
                   </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      const updatedProjects = projects.map(p => 
-                        p._id === project._id 
-                          ? {...p, showFullDescription: !p.showFullDescription}
-                          : p
-                      );
-                      setProjects(updatedProjects);
-                    }}
-                    className="px-6 py-2 bg-gradient-to-r from-red-600 to-purple-600 rounded-full text-sm font-bold hover:from-red-700 hover:to-purple-700 transition-all duration-300"
-                  >
-                    {project.showFullDescription ? 'Show Less' : 'Learn More'}
-                  </motion.button>
+                  <div className="flex gap-4">
+                    {project.link && (
+                      <motion.a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-2 bg-gradient-to-r from-red-600 to-purple-600 rounded-full text-sm font-bold hover:from-red-700 hover:to-purple-700 transition-all duration-300"
+                      >
+                        View Project
+                      </motion.a>
+                    )}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        const updatedProjects = projects.map(p => 
+                          p._id === project._id 
+                            ? {...p, showFullDescription: !p.showFullDescription}
+                            : p
+                        );
+                        setProjects(updatedProjects);
+                      }}
+                      className="px-6 py-2 bg-gradient-to-r from-red-600 to-purple-600 rounded-full text-sm font-bold hover:from-red-700 hover:to-purple-700 transition-all duration-300"
+                    >
+                      {project.showFullDescription ? 'Show Less' : 'Learn More'}
+                    </motion.button>
+                  </div>
                 </div>
               </motion.div>
             ))}
