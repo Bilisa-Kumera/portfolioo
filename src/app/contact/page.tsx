@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import emailjs from '@emailjs/browser';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -9,11 +10,45 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const [status, setStatus] = useState({
+    submitting: false,
+    submitted: false,
+    error: false,
+    message: "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement form submission
-    console.log("Form submitted:", formData);
+    setStatus({ submitting: true, submitted: false, error: false, message: "" });
+
+    try {
+      await emailjs.send(
+        'service_afi32kk',
+        'template_mh2894m',
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+          to_email: 'bilisakumera@gmail.com',
+        },
+        'XnHtTnv3E8pBJ5A72'
+      );
+
+      setStatus({
+        submitting: false,
+        submitted: true,
+        error: false,
+        message: "Message sent successfully! I'll get back to you soon.",
+      });
+      setFormData({ name: "", email: "", message: "" });
+    } catch {
+      setStatus({
+        submitting: false,
+        submitted: false,
+        error: true,
+        message: "Failed to send message. Please try again later.",
+      });
+    }
   };
 
   const handleChange = (
@@ -43,6 +78,26 @@ export default function Contact() {
           transition={{ delay: 0.2 }}
           className="bg-gray-900 rounded-lg p-8 shadow-xl"
         >
+          {status.submitted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-6 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-500"
+            >
+              {status.message}
+            </motion.div>
+          )}
+          
+          {status.error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-500"
+            >
+              {status.message}
+            </motion.div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
@@ -105,9 +160,12 @@ export default function Contact() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold rounded-lg hover:from-red-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-red-500/50"
+              disabled={status.submitting}
+              className={`w-full px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold rounded-lg hover:from-red-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-red-500/50 ${
+                status.submitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Send Message
+              {status.submitting ? 'Sending...' : 'Send Message'}
             </motion.button>
           </form>
         </motion.div>
