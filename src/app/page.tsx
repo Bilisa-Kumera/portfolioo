@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 // ----------------- Types -----------------
 interface About {
@@ -233,22 +234,28 @@ export default function Home() {
                 {firstAbout.description}
               </p>
               <div className="flex gap-6">
-                <motion.a
-                  href="/projects"
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-purple-600 rounded-full font-bold hover:from-red-700 hover:to-purple-700 shadow-lg hover:shadow-red-500/30 transition-all duration-300"
                 >
-                  View Projects
-                </motion.a>
-                <motion.a
-                  href="/contact"
+                  <Link
+                    href="/projects"
+                    className="px-8 py-3 bg-gradient-to-r from-red-600 to-purple-600 rounded-full font-bold hover:from-red-700 hover:to-purple-700 shadow-lg hover:shadow-red-500/30 transition-all duration-300"
+                  >
+                    View Projects
+                  </Link>
+                </motion.div>
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 border-2 border-red-500 rounded-full font-bold hover:bg-red-500/10 transition-all duration-300"
                 >
-                  Contact Me
-                </motion.a>
+                  <Link
+                    href="/contact"
+                    className="px-8 py-3 border-2 border-red-500 rounded-full font-bold hover:bg-red-500/10 transition-all duration-300"
+                  >
+                    Contact Me
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           </div>
