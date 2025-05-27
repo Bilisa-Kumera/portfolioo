@@ -233,28 +233,22 @@ export default function Home() {
                 {firstAbout.description}
               </p>
               <div className="flex gap-6">
-                <motion.button
-                  onClick={() => {
-                    const projectsSection = document.getElementById('projects');
-                    projectsSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                <motion.a
+                  href="/projects"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-3 bg-gradient-to-r from-red-600 to-purple-600 rounded-full font-bold hover:from-red-700 hover:to-purple-700 shadow-lg hover:shadow-red-500/30 transition-all duration-300"
                 >
                   View Projects
-                </motion.button>
-                <motion.button
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                </motion.a>
+                <motion.a
+                  href="/contact"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-3 border-2 border-red-500 rounded-full font-bold hover:bg-red-500/10 transition-all duration-300"
                 >
                   Contact Me
-                </motion.button>
+                </motion.a>
               </div>
             </motion.div>
           </div>
